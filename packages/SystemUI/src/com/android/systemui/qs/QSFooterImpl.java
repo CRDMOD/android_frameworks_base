@@ -35,6 +35,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -64,7 +65,7 @@ import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChange
 import com.android.systemui.tuner.TunerService;
 
 public class QSFooterImpl extends FrameLayout implements QSFooter, TunerService.Tunable,
-        OnClickListener, OnUserInfoChangedListener, EmergencyListener, SignalCallback {
+        OnClickListener, OnLongClickListener, OnUserInfoChangedListener, EmergencyListener, SignalCallback {
 
     private ActivityStarter mActivityStarter;
     private UserInfoController mUserInfoController;
@@ -402,30 +403,23 @@ public class QSFooterImpl extends FrameLayout implements QSFooter, TunerService.
             MetricsLogger.action(mContext,
                     mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
                             : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
-            if (mSettingsButton.isTunerClick()) {
-                Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
-                    if (TunerService.isTunerEnabled(mContext)) {
-                        TunerService.showResetRequest(mContext, () -> {
-                            // Relaunch settings so that the tuner disappears.
-                            startSettingsActivity();
-                        });
-                    } else {
-                        Toast.makeText(getContext(), R.string.tuner_toast,
-                                Toast.LENGTH_LONG).show();
-                        TunerService.setTunerEnabled(mContext, true);
-                    }
-                    startSettingsActivity();
-
-                });
-            } else {
                 startSettingsActivity();
-            }
-        } else if (v == mRunningServicesButton) {
-            MetricsLogger.action(mContext,
-                    mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
-                            : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
-            startRunningServicesActivity();
+			}
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if (v == mSettingsButton) {
+            startcrDroidActivity();
         }
+        return false;
+    }
+
+    private void startcrDroidActivity() {
+        Intent nIntent = new Intent(Intent.ACTION_MAIN);
+        nIntent.setClassName("com.android.settings",
+            "com.android.settings.Settings$crDroidSettingsLayoutActivity");
+        mActivityStarter.startActivity(nIntent, true /* dismissShade */);
     }
 
     private void startRunningServicesActivity() {
