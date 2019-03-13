@@ -164,15 +164,11 @@ public class QSFooterImpl extends FrameLayout implements QSFooter, TunerService.
     }
 
     private void updateAnimator(int width) {
-        int numTiles = QuickQSPanel.getNumQuickTiles(mContext);
-        int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size)
-                - mContext.getResources().getDimensionPixelSize(dimen.qs_quick_tile_padding);
-        int remaining = (width - numTiles * size) / (numTiles - 1);
-        int defSpace = mContext.getResources().getDimensionPixelOffset(R.dimen.default_gear_space);
+        int endMargin = mContext.getResources().getDimensionPixelSize(R.dimen.qs_footer_mobilegroup_margin_end);
+        int sum = endMargin + mMobileGroup.getWidth();
 
         mSettingsCogAnimator = new Builder()
-                .addFloat(mSettingsContainer, "translationX",
-                        isLayoutRtl() ? (remaining - defSpace) : -(remaining - defSpace), 0)
+                .addFloat(mCarrierText, "translationX", -sum, 0)
                 .addFloat(mSettingsButton, "rotation", -120, 0)
                 .build();
 
@@ -211,11 +207,11 @@ public class QSFooterImpl extends FrameLayout implements QSFooter, TunerService.
     private TouchAnimator createFooterAnimator() {
         return new TouchAnimator.Builder()
                 .addFloat(mDivider, "alpha", 0, 1)
-                .addFloat(mCarrierText, "alpha", 0, 0, 1)
-                .addFloat(mMobileGroup, "alpha", 0, 1)
-                .addFloat(mActionsContainer, "alpha", 0, 1)
-                .addFloat(mDragHandle, "alpha", 1, 0, 0)
+                .addFloat(mEdit, "alpha", 0, 1)
                 .addFloat(mPageIndicator, "alpha", 0, 1)
+                .addFloat(mMobileSignal, "alpha", 0, 1)
+                .addFloat(mMobileRoaming, "alpha", 0, 1)
+                .addFloat(mDragHandle, "alpha", 0, 0, 0)
                 .addFloat(mRunningServicesButton, "alpha", 0, 1)
                 .setStartDelay(0.15f)
                 .build();
@@ -343,7 +339,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter, TunerService.
             mMultiUserSwitch.setVisibility(View.GONE);
             mEdit.setVisibility(View.GONE);
             mRunningServicesButton.setVisibility(View.GONE);
-            mSettingsButton.setVisibility(View.GONE);
+            mSettingsButton.setVisibility(View.VISIBLE);
         } else {
             mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.GONE);
             mEdit.setVisibility(mShowEditIcon ? View.VISIBLE : View.GONE);
@@ -397,11 +393,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter, TunerService.
 
     @Override
     public void onClick(View v) {
-        // Don't do anything until view are unhidden
-        if (!mExpanded) {
-            return;
-        }
-
         if (v == mSettingsButton) {
             if (!Dependency.get(DeviceProvisionedController.class).isCurrentUserSetup()) {
                 // If user isn't setup just unlock the device and dump them back at SUW.
